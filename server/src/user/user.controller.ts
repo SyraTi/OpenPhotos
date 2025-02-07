@@ -11,6 +11,10 @@ export class UserController {
     private sessionService: SessionService,
   ) {}
 
+  /**
+   * 注册超管
+   * @param {RegisterDto} registerDto 用户信息
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Put('su')
@@ -24,6 +28,10 @@ export class UserController {
     )
   }
 
+  /**
+   * 注册用户
+   * @param {RegisterDto} registerDto 用户信息
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Put()
