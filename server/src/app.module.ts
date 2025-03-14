@@ -6,7 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { UserModule } from './user/user.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { GalleryModule } from './gallery/gallery.module'
+import { FileModule } from './file/file.module'
+import { ScanTaskModule } from './scan-task/scan-task.module'
 import * as process from 'node:process'
+import { ScanTask } from './entities/scan-task.entity'
+import { Gallery } from './entities/gallery.entity'
+import { File } from './entities/file.entity'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 console.log(process.env.NODE_ENV)
@@ -28,13 +34,16 @@ console.log(process.env.NODE_ENV)
         database: configService.get('DB_NAME'),
         synchronize: IS_DEV,
         logging: IS_DEV,
-        entities: [User],
+        entities: [User, Gallery, File, ScanTask],
         subscribers: [],
         migrations: [],
       }),
     }),
     SessionModule,
     UserModule,
+    GalleryModule,
+    FileModule,
+    ScanTaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],
