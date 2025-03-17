@@ -25,6 +25,16 @@ export class GalleryController {
   }
 
   /**
+   * 更新图片库
+   * @param id
+   * @param updateGalleryDto
+   */
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateGalleryDto: UpdateGalleryDto) {
+    return this.galleryService.update(+id, updateGalleryDto)
+  }
+
+  /**
    * 获取所有图片库
    */
   @Get()
@@ -48,15 +58,5 @@ export class GalleryController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.galleryService.findOne(+id)
-  }
-
-  /**
-   * 更新图片库
-   * @param id
-   * @param updateGalleryDto
-   */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGalleryDto: UpdateGalleryDto) {
-    return this.galleryService.update(+id, updateGalleryDto)
   }
 }

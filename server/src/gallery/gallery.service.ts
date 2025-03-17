@@ -44,8 +44,28 @@ export class GalleryService {
     return `This action returns a #${id} gallery`
   }
 
-  update(id: number, updateGalleryDto: UpdateGalleryDto) {
-    return `This action updates a #${id} gallery`
+  async update(id: number, updateGalleryDto: UpdateGalleryDto) {
+    try {
+      const gallery = await this.galleryRepository.findOne({ where: { id } })
+      if (updateGalleryDto.path) {
+        gallery.path = updateGalleryDto.path
+      }
+      if (updateGalleryDto.name) {
+        gallery.name = updateGalleryDto.name
+      }
+      if (Array.isArray(updateGalleryDto.userIds)) {
+        const users = await this.userRepository
+          .createQueryBuilder('user')
+          .where('user.id IN (:...userIds)', {
+            userIds: updateGalleryDto.userIds,
+          })
+          .execute()
+        gallery.users = users
+      }
+      await this.galleryRepository.save(gallery)
+    } catch (e) {
+      throw new ServiceUnavailableException()
+    }
   }
 
   remove(id: number) {
