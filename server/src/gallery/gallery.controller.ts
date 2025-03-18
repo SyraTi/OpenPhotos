@@ -10,6 +10,8 @@ import {
 import { GalleryService } from './gallery.service'
 import { CreateGalleryDto } from './dto/create-gallery.dto'
 import { UpdateGalleryDto } from './dto/update-gallery.dto'
+import { USER_ROLE } from '../entities/user.entity'
+import { UseRolesGuard } from '../session/guards/roles.guard'
 
 @Controller('gallery')
 export class GalleryController {
@@ -19,6 +21,7 @@ export class GalleryController {
    * 创建图片库
    * @param createGalleryDto
    */
+  @UseRolesGuard([USER_ROLE.SU])
   @Post()
   create(@Body() createGalleryDto: CreateGalleryDto) {
     return this.galleryService.create(createGalleryDto)

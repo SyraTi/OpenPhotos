@@ -10,10 +10,13 @@ import { ConfigService } from '@nestjs/config'
 
 import { SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { UserJWTPayload } from '../session.service'
 
-export const IS_PUBLIC_KEY = 'isPublic'
+const IS_PUBLIC_KEY = 'isPublic'
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true)
-
+/**
+ * 登录守卫
+ */
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
@@ -37,7 +40,7 @@ export class SessionGuard implements CanActivate {
       throw new UnauthorizedException()
     }
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload: UserJWTPayload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get('JWT_SECRET'),
       })
       // 💡 We're assigning the payload to the request object here

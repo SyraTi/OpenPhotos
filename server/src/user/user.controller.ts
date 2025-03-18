@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Put } from '@nestjs/common'
 import { UserService } from './user.service'
-import { Public } from '../session/session.guard'
+import { Public } from '../session/guards/session.guard'
 import { RegisterDto } from './dto/register.dto'
 import { SessionService } from '../session/session.service'
 

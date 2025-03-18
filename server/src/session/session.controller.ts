@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common'
 import { SessionService } from './session.service'
-import { Public } from './session.guard'
+import { Public } from './guards/session.guard'
 import { LoginDto } from './dto/login.dto'
 
 @Controller('session')
