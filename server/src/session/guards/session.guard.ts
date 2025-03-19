@@ -12,6 +12,8 @@ import { SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { UserJWTPayload } from '../session.service'
 
+export type SessionRequest = Request & { user: UserJWTPayload }
+
 const IS_PUBLIC_KEY = 'isPublic'
 export const Public = () => SetMetadata(IS_PUBLIC_KEY, true)
 /**

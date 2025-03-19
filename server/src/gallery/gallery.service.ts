@@ -1,14 +1,12 @@
-import {
-  BadRequestException,
-  Injectable,
-  ServiceUnavailableException,
-} from '@nestjs/common'
+import { Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { CreateGalleryDto } from './dto/create-gallery.dto'
 import { UpdateGalleryDto } from './dto/update-gallery.dto'
 import { Gallery } from '../entities/gallery.entity'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from '../entities/user.entity'
+import { SERVICE_STATUS, ServiceReturn } from '../utils/types'
+import { GalleryResponseDto } from './dto/gallery-response.dto'
 
 @Injectable()
 export class GalleryService {
@@ -18,26 +16,94 @@ export class GalleryService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
-  async create(createGalleryDto: CreateGalleryDto) {
+  async create(
+    createGalleryDto: CreateGalleryDto,
+  ): Promise<ServiceReturn<GalleryResponseDto>> {
     try {
+      const pathExists = await this.galleryRepository.existsBy({
+        path: createGalleryDto.path,
+      })
+      if (pathExists) {
+        return {
+          status: SERVICE_STATUS.ERROR,
+          reason: '路径已存在',
+        }
+      }
       const gallery = new Gallery()
       gallery.path = createGalleryDto.path
       gallery.name = createGalleryDto.name
-      const users = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.id IN (:...userIds)', {
-          userIds: createGalleryDto.userIds,
-        })
-        .execute()
+      let users = []
+      if (createGalleryDto.userIds) {
+        users = await this.userRepository
+          .createQueryBuilder()
+          .where('id IN (:...userIds)', {
+            userIds: createGalleryDto.userIds,
+          })
+          .getMany()
+      }
       gallery.users = users
-      await this.galleryRepository.save(gallery)
+      const result = await this.galleryRepository.save(gallery)
+      return {
+        status: SERVICE_STATUS.SUCCESS,
+        data: {
+          id: result.id,
+          name: result.name,
+          path: result.path,
+          count: result.count,
+          userIds: users.map((user) => user.id),
+        },
+      }
     } catch (e) {
+      console.error(e)
       throw new ServiceUnavailableException()
     }
   }
 
-  findAll() {
-    return `This action returns all gallery`
+  async findAll(): Promise<ServiceReturn<GalleryResponseDto[]>> {
+    try {
+      const galleries = await this.galleryRepository.find({
+        relations: {
+          users: true,
+        },
+      })
+      return {
+        status: SERVICE_STATUS.SUCCESS,
+        data: galleries.map((gallery) => ({
+          id: gallery.id,
+          name: gallery.name,
+          path: gallery.path,
+          count: gallery.count,
+          userIds: gallery.users.map((user) => user.id),
+        })),
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ServiceUnavailableException()
+    }
+  }
+
+  async findAllByUser(
+    userId: number,
+  ): Promise<ServiceReturn<GalleryResponseDto[]>> {
+    try {
+      const galleries = await this.galleryRepository
+        .createQueryBuilder('gallery')
+        .innerJoin('gallery.users', 'users')
+        .where('users.id = :userId', { userId })
+        .getMany()
+      return {
+        status: SERVICE_STATUS.SUCCESS,
+        data: galleries.map((gallery) => ({
+          id: gallery.id,
+          name: gallery.name,
+          path: gallery.path,
+          count: gallery.count,
+        })),
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ServiceUnavailableException()
+    }
   }
 
   findOne(id: number) {
@@ -64,6 +130,7 @@ export class GalleryService {
       }
       await this.galleryRepository.save(gallery)
     } catch (e) {
+      console.error(e)
       throw new ServiceUnavailableException()
     }
   }
