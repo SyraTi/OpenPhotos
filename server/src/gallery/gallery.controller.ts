@@ -49,7 +49,7 @@ export class GalleryController {
       case USER_ROLE.SU:
         return this.galleryService.findAll()
       case USER_ROLE.USER:
-        return this.galleryService.findAllByUser(req.user.sub)
+        return this.galleryService.findAllByUser(+req.user.sub)
     }
   }
 
@@ -57,6 +57,7 @@ export class GalleryController {
    * 删除图片库
    * @param id
    */
+  @UseRolesGuard([USER_ROLE.SU])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.galleryService.remove(+id)

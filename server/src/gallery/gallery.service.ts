@@ -59,6 +59,9 @@ export class GalleryService {
     }
   }
 
+  /**
+   * 获取所有图库
+   */
   async findAll(): Promise<ServiceReturn<GalleryResponseDto[]>> {
     try {
       const galleries = await this.galleryRepository.find({
@@ -82,6 +85,10 @@ export class GalleryService {
     }
   }
 
+  /**
+   * 根据用户id获取图库列表
+   * @param {number} userId 用户id
+   */
   async findAllByUser(
     userId: number,
   ): Promise<ServiceReturn<GalleryResponseDto[]>> {
@@ -110,6 +117,11 @@ export class GalleryService {
     return `This action returns a #${id} gallery`
   }
 
+  /**
+   * 更新图库
+   * @param {number} id 图库id
+   * @param {UpdateGalleryDto} updateGalleryDto 更新项
+   */
   async update(id: number, updateGalleryDto: UpdateGalleryDto) {
     try {
       const gallery = await this.galleryRepository.findOne({ where: { id } })
@@ -135,7 +147,20 @@ export class GalleryService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} gallery`
+  /**
+   * 根据id删除图库
+   * @param {number} id 图库id
+   */
+  async remove(id: number): Promise<ServiceReturn<{ affected: number }>> {
+    try {
+      const result = await this.galleryRepository.softDelete({ id })
+      return {
+        status: SERVICE_STATUS.SUCCESS,
+        data: { affected: result.affected },
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ServiceUnavailableException()
+    }
   }
 }
