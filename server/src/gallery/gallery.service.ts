@@ -113,10 +113,6 @@ export class GalleryService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} gallery`
-  }
-
   /**
    * 更新图库
    * @param {number} id 图库id

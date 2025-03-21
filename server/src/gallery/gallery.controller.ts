@@ -62,13 +62,4 @@ export class GalleryController {
   remove(@Param('id') id: string) {
     return this.galleryService.remove(+id)
   }
-
-  /**
-   * 获取单个图片库
-   * @param id 图片库id
-   */
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.galleryService.findOne(+id)
-  }
 }
