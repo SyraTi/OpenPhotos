@@ -1,6 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { UserService } from '../user/user.service'
 import { JwtService } from '@nestjs/jwt'
+import { USER_ROLE } from '../entities/user.entity'
+
+export interface UserJWTPayload {
+  sub: number
+  username: string
+  role: USER_ROLE
+}
 
 @Injectable()
 export class SessionService {
@@ -54,7 +61,7 @@ export class SessionService {
         sub: user.id,
         username: user.username,
         role: user.role,
-      }),
+      } as UserJWTPayload),
     }
   }
 }

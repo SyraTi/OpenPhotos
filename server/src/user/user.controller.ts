@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Put } from '@nestjs/common'
 import { UserService } from './user.service'
-import { Public } from '../session/session.guard'
+import { Public } from '../session/guards/session.guard'
 import { RegisterDto } from './dto/register.dto'
 import { SessionService } from '../session/session.service'
 
@@ -11,6 +11,10 @@ export class UserController {
     private sessionService: SessionService,
   ) {}
 
+  /**
+   * 注册超管
+   * @param {RegisterDto} registerDto 用户信息
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Put('su')
@@ -24,6 +28,10 @@ export class UserController {
     )
   }
 
+  /**
+   * 注册用户
+   * @param {RegisterDto} registerDto 用户信息
+   */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Put()
