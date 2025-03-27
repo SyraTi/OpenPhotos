@@ -3,10 +3,15 @@ import { CreateGalleryDto } from './dto/create-gallery.dto'
 import { UpdateGalleryDto } from './dto/update-gallery.dto'
 import { Gallery } from '../entities/gallery.entity'
 import { Repository } from 'typeorm'
+import path from 'path'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from '../entities/user.entity'
 import { SERVICE_STATUS, ServiceReturn } from '../utils/types'
 import { GalleryResponseDto } from './dto/gallery-response.dto'
+import crypto from 'crypto'
+import sharp from 'sharp'
+import exifReader from 'exif-reader'
+import { dmsToDecimal } from '../utils'
 
 @Injectable()
 export class GalleryService {
@@ -59,6 +64,74 @@ export class GalleryService {
     }
   }
 
+  async uploadFile(
+    id: number,
+    files: Array<Express.Multer.File>,
+  ): Promise<ServiceReturn<any>> {
+    try {
+      const gallery = await this.galleryRepository.findOneBy({ id })
+      if (!gallery) {
+        return {
+          status: SERVICE_STATUS.ERROR,
+          reason: '图库不存在',
+        }
+      }
+      for (const file of files) {
+        const filePath = path.join(gallery.path, file.originalname)
+        const mimetype = file.mimetype
+        const hash = crypto
+          .createHash('sha256')
+          .update(file.buffer)
+          .digest('hex')
+        const size = file.size
+        let width = 0
+        let height = 0
+        let orientation = null
+        let exif = null
+        const gps_lng = null
+        const gps_lat = null
+        const token_at = null
+        switch (mimetype) {
+          case 'image/jpeg':
+          case 'image/jpg':
+          case 'image/png':
+          case 'image/webp':
+          case 'image/gif':
+          case 'image/bmp':
+            // 获取图片的宽高
+            const metadata = await sharp(file.buffer).metadata()
+            width = metadata.width
+            height = metadata.height
+            orientation = metadata.orientation ?? null
+            exif = metadata.exif ? exifReader(metadata.exif) : null
+            if (exif) {
+              gps_lng = dmsToDecimal(
+                ...(exif.GPSInfo.GPSLongitude as [number, number, number]),
+                exif.GPSInfo.GPSLongitudeRef,
+              )
+              gps_lat = dmsToDecimal(
+                ...(exif.GPSInfo.GPSLatitude as [number, number, number]),
+                exif.GPSInfo.GPSLatitudeRef,
+              )
+              token_at = exif.Photo.DateTimeOriginal
+            }
+
+          // todo is_live_photo 不同平台格式过于复杂 暂时先不做
+          // todo is_screenshot、is_selfie、keyword、ocr_result AI任务暂时不做
+          case 'video/mp4':
+            break
+          default:
+            break
+        }
+
+        // todo generation tasks
+        // 包括生成缩略图、ai扫描等等
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ServiceUnavailableException()
+    }
+  }
   /**
    * 获取所有图库
    */

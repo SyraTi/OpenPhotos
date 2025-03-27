@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 import { Gallery } from './gallery.entity'
+import type { Exif } from 'exif-reader'
 
 /**
  * @class File 文件实体类
@@ -25,6 +26,7 @@ import { Gallery } from './gallery.entity'
  * @property {number} orientation 图片方向
  * @property {number} gps_lng gps经度
  * @property {number} gps_lat gps纬度
+ * @property {Exif} exif exif信息
  * @property {boolean} is_live_photo 是否为live photo
  * @property {boolean} is_screenshot 是否为截图
  * @property {boolean} is_screen_record 是否为录屏
@@ -87,6 +89,12 @@ export class File {
     default: null,
   })
   gps_lat: number
+
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  exif: Exif
 
   @Column({
     default: false,

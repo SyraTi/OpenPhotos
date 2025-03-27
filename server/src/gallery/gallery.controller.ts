@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Request,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common'
 import { GalleryService } from './gallery.service'
 import { CreateGalleryDto } from './dto/create-gallery.dto'
@@ -14,6 +16,8 @@ import { UpdateGalleryDto } from './dto/update-gallery.dto'
 import { USER_ROLE } from '../entities/user.entity'
 import { UseRolesGuard } from '../session/guards/roles.guard'
 import { SessionRequest } from '../session/guards/session.guard'
+import { CreateFileDto } from '../file/dto/create-file.dto'
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 
 @Controller('gallery')
 export class GalleryController {
@@ -27,6 +31,15 @@ export class GalleryController {
   @Post()
   create(@Body() createGalleryDto: CreateGalleryDto) {
     return this.galleryService.create(createGalleryDto)
+  }
+
+  @Post(':id/file')
+  @UseInterceptors(FilesInterceptor('files'))
+  uploadFile(
+    @Param('id') id: string,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return this.galleryService.uploadFile(+id, files)
   }
 
   /**
